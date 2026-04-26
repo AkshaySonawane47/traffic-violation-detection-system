@@ -1,0 +1,9 @@
+# AI-Based Traffic Violation Detection System
+# Install with: pip install -r requirements.txt
+
+opencv-python>=4.8.0       # Computer vision — detection, drawing, video
+easyocr>=1.7.0             # Number plate OCR (downloads model on first run)
+openpyxl>=3.1.0            # Excel read/write for owner DB and violation log
+fpdf2>=2.7.0               # PDF challan generation
+Pillow>=10.0.0             # Image handling (required by fpdf2 for image embed)
+numpy>=1.24.0              # Numerical operations
