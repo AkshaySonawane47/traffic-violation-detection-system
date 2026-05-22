@@ -1,0 +1,12 @@
+# AI Traffic Violation Detection System — Requirements
+# Install: pip install -r requirements.txt
+
+opencv-python>=4.8.0
+ultralytics>=8.0.0       # YOLOv8
+easyocr>=1.7.0           # Number plate OCR
+pandas>=2.0.0            # Excel reading (robust)
+openpyxl>=3.1.0          # Excel read/write
+fpdf2>=2.7.0             # PDF challan generation
+Pillow>=10.0.0           # Image handling
+numpy>=1.24.0            # Numerical operations
+difflib                  # Built-in (fuzzy matching — no install needed)
