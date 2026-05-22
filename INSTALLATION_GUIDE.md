@@ -2,34 +2,7 @@
 
 **Complete setup instructions for running this project on a NEW PC from scratch.**
 
----
 
-## 📋 Table of Contents
-1. [System Requirements](#system-requirements)
-2. [Step-by-Step Installation](#step-by-step-installation)
-3. [Project Structure](#project-structure)
-4. [Quick Start Commands](#quick-start-commands)
-5. [Troubleshooting](#troubleshooting)
-6. [Performance Tips](#performance-tips)
-
----
-
-## 🖥️ System Requirements
-
-### Minimum Requirements
-- **OS**: Windows 10/11, macOS 10.14+, or Linux (Ubuntu 18.04+)
-- **Python**: 3.8 or higher
-- **RAM**: 4 GB minimum (8 GB recommended)
-- **Disk Space**: 5 GB (includes models downloaded on first run)
-- **Processor**: Intel i5/AMD Ryzen 5 or better
-
-### Software Prerequisites
-- Python 3.8+ installed and added to PATH
-- pip (Python package manager - comes with Python)
-- Git (optional, for cloning repo)
-- Webcam or video files (for testing)
-
----
 
 ## 🚀 Step-by-Step Installation
 
