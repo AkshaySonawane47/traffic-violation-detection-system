@@ -1,68 +1,317 @@
-# AI Traffic Violation Detection System — FINAL
+# 🚗 Traffic Violation Detection System - Complete Installation Guide
 
-## Quick Start
+**Complete setup instructions for running this project on a NEW PC from scratch.**
+
+
+
+## 🚀 Step-by-Step Installation
+
+### **STEP 1: Download & Navigate to Project**
+
+#### Option A: Using Git (Recommended)
 ```bash
-pip install -r requirements.txt
-python create_owners.py          # create bike_owners.xlsx
-python detector.py video2_without_helmet.mp4   # test no-helmet
-python detector.py video_with_helmet.mp4       # test with helmet
-python detector.py video2_without_helmet.mp4 --roi  # draw detection zone
+git clone https://github.com/AkshaySonawane47/traffic-violation-detection-system.git
+cd traffic-violation-detection-system
+cd traffic_fixed
 ```
 
-## What Each File Does
-| File | Purpose |
-|---|---|
-| detector.py | Main — YOLO + helmet + OCR + challan |
-| plate_ocr.py | 4-pass OCR + 3-method fuzzy matching |
-| tracker.py | Centroid tracker with velocity prediction |
-| violation_log.py | Save to violations.xlsx |
-| challan_pdf.py | Generate PDF challan |
-| roi_selector.py | Draw detection polygon |
-| config/settings.py | ALL tuneable parameters |
+#### Option B: Manual Download
+1. Click **Code** → **Download ZIP**
+2. Extract the ZIP file
+3. Open Command Prompt/Terminal in `traffic_fixed` folder
 
-## What Was Fixed
+---
 
-### OCR → UNKNOWN problem
-- Confidence threshold: 0.25 → **0.10** (catches blurry plates)
-- Match threshold: 0.45 → **0.20** (catches partial reads)
-- Added **OCR correction variants**: 0↔O, 1↔I, 8↔B, 5↔S etc.
-- Added **difflib SequenceMatcher** as 3rd scoring method
-- 4-pass preprocessing: adaptive-INV + OTSU + gray + colour
+### **STEP 2: Create Python Virtual Environment** ✨
 
-### Excel matching broken
-- Switched from openpyxl cell-by-cell to **pandas** (dtype=str)
-- All keys normalized: `strip().upper().replace(' ','')` 
-- All values `str()`-cast (handles cells stored as int/float)
+**Why?** Isolates project dependencies, prevents conflicts with other projects.
 
-### Helmet false positives
-- HEAD_FRACTION: 0.38 → **0.28** (only true forehead)
-- Added **dark colour check**: V-mean < 75 → likely dark helmet → OK
-- **Voting**: need BOTH skin AND face cascade to fire (was any one)
-- Edge density check **removed** (fired on textured helmets)
+```bash
+# Create virtual environment
+python -m venv venv
 
-### Yellow box on wrong object
-- Yellow box now = **RIDER union box** (person detection)
-- Cyan outline = bike YOLO box (separate layer)
-- Green small box = number plate
+# Activate it:
 
-### Plate drifts randomly
-- Plate always searched relative to **BIKE box** (never person box)
-- On persons-only path, plate search is skipped (no anchor)
-- Fallback = deterministic `bike_bottom + 5px`
+# On Windows:
+venv\Scripts\activate
 
-### Person-bike linking too strict
-- X tolerance: bw*0.25 → **max(bw*0.5, 60px)**
-- Y range: ±bh → **bike_top - bh*1.5 to bike_bottom + bh*0.5**
-- Added condition 3: person bottom within 30px of bike bottom
+# On macOS/Linux:
+source venv/bin/activate
+```
 
-## Tuning Guide
-All in `config/settings.py`:
+✅ **You'll see `(venv)` prefix in your terminal when activated.**
 
-| Setting | Default | Effect |
-|---|---|---|
-| PLATE_MATCH_MIN | 0.20 | Lower = matches more plates from Excel |
-| SKIN_THRESHOLD | 0.20 | Lower = more sensitive helmet detection |
-| HEAD_FRACTION | 0.28 | Higher = bigger head region checked |
-| YOLO_CONF | 0.25 | Lower = detects more bikes/persons |
-| DETECT_EVERY | 3 | Lower = more detections (slower) |
-| COOLDOWN_SEC | 10 | Lower = can re-flag same plate sooner |
+---
+
+### **STEP 3: Upgrade pip**
+
+```bash
+python -m pip install --upgrade pip
+```
+
+---
+
+### **STEP 4: Install Dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+**This installs:**
+- `opencv-python` - Video processing
+- `ultralytics` - YOLOv8 object detection
+- `easyocr` - License plate OCR
+- `pandas` - Excel file handling
+- `openpyxl` - Excel read/write
+- `fpdf2` - PDF challan generation
+- `Pillow` - Image processing
+- `numpy` - Numerical operations
+
+⏱️ **Note:** First run may take **3-5 minutes** (downloads ML models ~200 MB)
+
+---
+
+### **STEP 5: Create Owner Database**
+
+```bash
+python create_owners.py
+```
+
+This generates `bike_owners.xlsx` with sample vehicle data:
+- Plate: `BR02BS9361` → Owner: Akshay Sonawane
+- Plate: `DL9SCD5588` → Owner: Lalit Wagh
+
+**To add your own vehicles:** Edit `create_owners.py` before running.
+
+---
+
+### **STEP 6: Get Test Videos**
+
+#### Option A: Download from YouTube (Recommended)
+```bash
+pip install yt-dlp
+
+# Video 1: No helmet violation
+yt-dlp -o "video_no_helmet.mp4" "https://youtube.com/shorts/A9J3E6BHwbM"
+
+# Video 2: Triple riding violation
+yt-dlp -o "video_triple.mp4" "https://youtube.com/shorts/u-VXR5fY8_k"
+```
+
+#### Option B: Use Your Own Videos
+- **Format**: MP4, AVI, or MOV
+- **Resolution**: 480p to 1080p
+- **Duration**: 5-30 seconds minimum
+
+---
+
+### **STEP 7: Run the Detector** ▶️
+
+```bash
+# Basic detection
+python detector.py video_no_helmet.mp4
+
+# With ROI selection (draw detection zone first)
+python detector.py video_triple.mp4 --roi
+
+# Using webcam (press 'q' to quit)
+python detector.py 0
+```
+
+**Output files generated:**
+- ✅ `violations.xlsx` - Violation log
+- ✅ `violation_images/` - Evidence screenshots
+- ✅ `challans/` - PDF e-challans
+
+---
+
+## 📁 Project Structure
+
+```
+traffic_fixed/
+│
+├── detector.py           ← MAIN FILE (run this)
+├── plate_ocr.py          ← License plate OCR & matching
+├── tracker.py            ← Vehicle tracking
+├── violation_log.py      ← Save violations to Excel
+├── challan_pdf.py        ← Generate PDF challans
+├── roi_selector.py       ← Draw detection zone
+├── create_owners.py      ← Create vehicle database
+│
+├── config/
+│   └── settings.py       ← ALL tunable parameters
+│
+├── requirements.txt      ← Python dependencies
+├── README.md             ← Quick reference
+├── INSTALLATION_GUIDE.md ← This file
+│
+├── bike_owners.xlsx      ← Vehicle database (auto-created)
+├── violations.xlsx       ← Violation records (auto-created)
+├── violation_images/     ← Evidence photos (auto-created)
+└── challans/             ← PDF files (auto-created)
+```
+
+---
+
+## ⚡ Quick Start Commands
+
+**After setup, use these commands:**
+
+```bash
+# Activate environment (every time you open terminal)
+source venv/bin/activate  # macOS/Linux
+venv\Scripts\activate     # Windows
+
+# Add vehicles to database
+python create_owners.py
+
+# Run on video file
+python detector.py video.mp4
+
+# Run on webcam
+python detector.py 0
+
+# Run with ROI selection
+python detector.py video.mp4 --roi
+
+# Deactivate environment
+deactivate
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### ❌ "Python not found" or "pip not found"
+**Solution:** 
+1. Reinstall Python from [python.org](https://python.org)
+2. ✅ **CHECK: "Add Python to PATH"** during installation
+3. Restart Command Prompt/Terminal
+
+### ❌ "No module named 'cv2'" or other import errors
+```bash
+# Reinstall requirements
+pip install --upgrade -r requirements.txt
+```
+
+### ❌ Virtual environment not activating
+```bash
+# Delete old venv and recreate
+rmdir venv
+python -m venv venv
+venv\Scripts\activate  # Windows
+```
+
+### ❌ EasyOCR model download errors
+```bash
+# Clear cache and retry
+pip install --upgrade easyocr
+# Run detector again (will re-download models)
+```
+
+### ❌ "Video file not found"
+- Ensure video is in the same folder as `detector.py`
+- Use full path: `python detector.py C:\videos\myvideo.mp4`
+
+### ❌ Low FPS or laggy detection (4GB RAM)
+In `config/settings.py`, change:
+```python
+DETECT_EVERY = 20       # Skip frames (default: 3)
+YOLO_CONF = 0.5         # Lower detection sensitivity
+RESIZE_W = 480          # Smaller resolution
+```
+
+### ❌ No violations detected
+1. Check `bike_owners.xlsx` has correct plate numbers
+2. Ensure plate is clearly visible in video
+3. Verify helmet/triple-riding is actually in video
+4. Check `config/settings.py` thresholds
+
+---
+
+## ⚙️ Performance Tips
+
+### For Slow Computers (4GB RAM):
+```python
+# In config/settings.py:
+DETECT_EVERY = 20           # Process every 20th frame
+RESIZE_W = 480              # Lower resolution
+YOLO_CONF = 0.5             # Less strict detection
+```
+
+### For Better Accuracy:
+```python
+# In config/settings.py:
+DETECT_EVERY = 1            # Process every frame
+RESIZE_W = 1280             # Higher resolution
+YOLO_CONF = 0.25            # More strict detection
+```
+
+### System Optimization:
+- Close Chrome, VS Code, heavy apps while running
+- Use 480p video for faster processing
+- Disable sound alerts: `SOUND_ALERT = False`
+
+---
+
+## 🎯 What Gets Detected
+
+| Violation | Detection Method | Fine |
+|-----------|-----------------|------|
+| **No Helmet** | Face detection + skin analysis | Rs. 1,000 |
+| **Triple Riding** | Multiple person detection | Rs. 1,000 |
+| **Overspeed** | Pixel displacement (optional) | Rs. 2,000 |
+
+---
+
+## 📧 Optional: Send Email Challans
+
+Edit `config/settings.py`:
+```python
+SENDER_EMAIL = "your_email@gmail.com"
+SENDER_PASSWORD = "your_app_password"  # Use Gmail App Password, not regular password
+```
+
+Then run:
+```bash
+python send_emails.py
+```
+
+> **Note:** Enable 2-Factor Authentication and create an App Password in Gmail settings.
+
+---
+
+## ✅ Verification Checklist
+
+After installation, verify everything works:
+
+- [ ] Virtual environment created and activated
+- [ ] All requirements installed (`pip list` shows all packages)
+- [ ] `bike_owners.xlsx` created
+- [ ] Test video downloaded
+- [ ] `python detector.py video.mp4` runs without errors
+- [ ] `violations.xlsx` created after detection
+- [ ] Evidence images saved in `violation_images/`
+
+---
+
+## 🆘 Need Help?
+
+1. **Check Logs:** Look at terminal output for error messages
+2. **Verify Paths:** Ensure all files are in correct directories
+3. **Reinstall:** `pip install --force-reinstall -r requirements.txt`
+4. **Fresh Start:** Delete `venv`, reinstall from scratch
+
+---
+
+## 📝 Notes
+
+- **First run is slow** (downloads ML models)
+- **Virtual environment** isolates project dependencies
+- **All settings** can be tuned in `config/settings.py`
+- **Violations logged** in `violations.xlsx`
+- **Evidence saved** in `violation_images/` and `challans/`
+
+---
+
+**Happy Traffic Monitoring! 🚔**
